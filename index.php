@@ -1,8 +1,9 @@
 <?php 
-session_start();
-if(empty($_SESSION['is_login'])){
-    header('Location: login.php');
-}
+    session_start();
+    if (empty($_SESSION['is_login'])) {
+        header('Location: login.php');
+        exit();
+    }
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,6 +11,8 @@ if(empty($_SESSION['is_login'])){
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -25,13 +28,253 @@ if(empty($_SESSION['is_login'])){
             }
         }
     </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-color: #f5f7fa;
+            --container-bg: white;
+            --text-color: #2c3e50;
+            --text-secondary: #6c757d;
+            --border-color: #e9ecef;
+            --hover-bg: #f8f9fa;
+            --even-row-bg: #fafbfc;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --sidebar-bg: #0f172a;
+            --sidebar-text: #e2e8f0;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --container-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --text-secondary: #b0b0b0;
+            --border-color: #404040;
+            --hover-bg: #3a3a3a;
+            --even-row-bg: #333333;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+
+        [data-theme="dark"] .bg-gray-50 {
+            background-color: var(--bg-color) !important;
+        }
+
+        [data-theme="dark"] .bg-white {
+            background-color: var(--container-bg) !important;
+        }
+
+        [data-theme="dark"] .text-gray-800,
+        [data-theme="dark"] .text-gray-900 {
+            color: var(--text-color) !important;
+        }
+
+        [data-theme="dark"] .text-gray-600,
+        [data-theme="dark"] .text-gray-700 {
+            color: var(--text-secondary) !important;
+        }
+
+        [data-theme="dark"] .border-gray-200,
+        [data-theme="dark"] .border-gray-300 {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .shadow,
+        [data-theme="dark"] .shadow-sm,
+        [data-theme="dark"] .shadow-lg {
+            box-shadow: 0 4px 6px var(--shadow) !important;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .product-table-container {
+            background: var(--container-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow);
+            overflow: hidden;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .product-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .product-table thead {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .product-table th {
+            padding: 18px 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.8rem;
+        }
+
+        .product-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            color: var(--text-color);
+        }
+
+        .product-table tbody tr:hover {
+            background-color: var(--hover-bg);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px var(--shadow);
+        }
+
+        .product-table tbody tr:nth-child(even) {
+            background-color: var(--even-row-bg);
+        }
+
+        .product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .product-image:hover {
+            transform: scale(1.1);
+            border-color: #4facfe;
+        }
+
+        .product-id {
+            font-weight: 600;
+            color: var(--text-color);
+            font-family: 'Courier New', monospace;
+        }
+
+        .product-name {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .qty {
+            text-align: center;
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        .price {
+            font-weight: 600;
+            color: #dc3545;
+            text-align: right;
+        }
+
+        
+
+        .user-id {
+            font-family: 'Courier New', monospace;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .timestamp {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-active {
+            background-color: #28a745;
+        }
+
+        .status-low-stock {
+            background-color: #ffc107;
+        }
+
+        .status-out-of-stock {
+            background-color: #dc3545;
+        }
+
+        [data-theme="dark"] .qty {
+            color: #4ade80;
+        }
+
+        [data-theme="dark"] .price {
+            color: #f87171;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .product-table {
+                font-size: 0.8rem;
+            }
+            
+            .product-table th,
+            .product-table td {
+                padding: 10px 8px;
+            }
+            
+            .product-image {
+                width: 40px;
+                height: 40px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-table th:nth-child(6),
+            .product-table td:nth-child(6),
+            .product-table th:nth-child(7),
+            .product-table td:nth-child(7),
+            .product-table th:nth-child(8),
+            .product-table td:nth-child(8) {
+                display: none;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" data-theme="light">
     <div class="flex h-screen">
         <!-- Sidebar -->
         <div class="w-64 bg-sidebar text-sidebar-foreground shadow-lg">
-            <div class="p-6">
+            <div class="p-6 flex items-center justify-between">
                 <h1 class="text-xl font-bold text-white">Dashboard</h1>
+                <button onclick="toggleTheme()" class="theme-toggle-btn">
+                    <svg id="theme-icon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                    </svg>
+                </button>
             </div>
             
             <nav class="mt-6">
@@ -63,10 +306,7 @@ if(empty($_SESSION['is_login'])){
                     Products
                 </a>
                 
-                <div class="px-6 py-2 mt-6">
-                    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Settings</p>
-                </div>
-                <a href="#" onclick="showPage('settings')" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:text-white hover:bg-slate-700 transition-colors" data-page="settings">
+                <a style="margin-top: 300px;" href="#" onclick="showPage('settings')" class="nav-link flex items-center px-6 py-3 text-gray-300 hover:text-white hover:bg-slate-700 transition-colors" data-page="settings">
                     <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -354,37 +594,103 @@ if(empty($_SESSION['is_login'])){
 
                 <!-- Products Page Content -->
                 <div id="products-page" class="page-content hidden">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="Product" class="w-full h-48 object-cover rounded-lg mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Wireless Headphones</h3>
-                            <p class="text-gray-600 text-sm mb-4">High-quality wireless headphones with noise cancellation.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-gray-900">$199.99</span>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">In Stock</span>
+                    <div class="product-table-container">
+                        <div class="p-6">
+                            <div class="text-center mb-6">
+                                <h1 class="text-3xl font-bold text-gray-900 mb-2" >Product Management</h1>
+                                <p class="text-gray-600">Comprehensive product inventory and tracking system</p>
                             </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <img src="https://images.unsplash.com/photo-1546868871-7041f2a55e12?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="Product" class="w-full h-48 object-cover rounded-lg mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Smart Watch</h3>
-                            <p class="text-gray-600 text-sm mb-4">Advanced smartwatch with health monitoring features.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-gray-900">$299.99</span>
-                                <span class="px-2 py-1 bg-red-100 text-red-800 text-xs rounded-full">Out of Stock</span>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white rounded-lg shadow p-6">
-                            <img src="https://images.unsplash.com/photo-1588508065123-287b28e013da?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" alt="Product" class="w-full h-48 object-cover rounded-lg mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Laptop Stand</h3>
-                            <p class="text-gray-600 text-sm mb-4">Ergonomic laptop stand for better posture and comfort.</p>
-                            <div class="flex justify-between items-center">
-                                <span class="text-xl font-bold text-gray-900">$49.99</span>
-                                <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">In Stock</span>
+                            
+                            <div class="overflow-x-auto">
+                                <button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Product</button>
+                                <table class="product-table mt-5">
+                                    <thead>
+                                        <tr>
+                                            <th>Image</th>
+                                            <th>Product ID</th>
+                                            <th>Product Name</th>
+                                            <th>Quantity</th>
+                                            <th>Price</th>
+                                            <th>User ID</th>
+                                            <th>Created At</th>
+                                            <th>Updated At</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php 
+                                            include 'connection.php';
+                                            global $con;
+                                            $selectProduct="SELECT *, `profile` FROM `tbproducts` INNER JOIN `tbusers` ON `user_id`=`userID`";
+                                            $res=$con->query($selectProduct);
+                                            while($row=$res->fetch_assoc()){
+                                                echo '
+                                                     <tr>
+                                            <td>
+                                                <img width="60" src="./uploads/'. $row['image']. '" />
+                                            </td>
+                                            <td class="product-id">'.$row['product_id'].'</td>
+                                            <td class="product-name">
+                                                <span class="status-indicator status-active"></span>
+                                                '.$row['product_name'].'
+                                            </td>
+                                            <td class="qty">'.$row['qty'].'</td>
+                                            <td class="price">'.$row['price'].'</td>
+                                            <td class="user-id"><img width="60" src="./uploads/'. $row['profile']. '" /></td>
+                                            <td class="timestamp">'.$row['create_at'].'</td>
+                                            <td class="timestamp">'.$row['update_at'].'</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
+                                            <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                        </td>
+                                        </tr>
+                                                ';
+                                            }
+                                        ?>
+                                       
+                                       
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
+                </div>
+                <!-- Modal -->
+                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Add Product</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                       <form action="function.php" method="post" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="" class="form-label">Product Name</label>
+                                <input type="text" name="name" id="" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="form-label">Product Qty</label>
+                                <input type="text" name="qty" id="" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="form-label">Product Price</label>
+                                <input type="text" name="price" id="" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label for="" class="form-label">Product Image</label>
+                                <input type="file" name="image" id="" class="form-control">
+                            </div>
+                            <div class="form-group d-flex justify-content-end gap-2 mt-3">
+                                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-primary" name="btnSave">Save </button>
+                            </div>
+                            
+                       </form>
+                    </div>
+                   
+                    </div>
+                </div>
                 </div>
 
                 <!-- Settings Page Content -->
@@ -442,6 +748,40 @@ if(empty($_SESSION['is_login'])){
     </div>
 
     <script>
+        // Dark mode functionality
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            const currentTheme = body.getAttribute('data-theme');
+            
+            if (currentTheme === 'dark') {
+                body.setAttribute('data-theme', 'light');
+                themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            body.setAttribute('data-theme', savedTheme);
+            
+            if (savedTheme === 'dark') {
+                themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>';
+            } else {
+                themeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>';
+            }
+            
+            showPage('home');
+        });
+
         // Page navigation functionality
         function showPage(pageId) {
             // Hide all pages
@@ -484,11 +824,6 @@ if(empty($_SESSION['is_login'])){
                 pageTitle.textContent = titles[pageId];
             }
         }
-        
-        // Initialize the page
-        document.addEventListener('DOMContentLoaded', function() {
-            showPage('home');
-        });
     </script>
 </body>
 </html>
