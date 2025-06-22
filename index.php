@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js" integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -602,7 +603,7 @@
                             </div>
                             
                             <div class="overflow-x-auto">
-                                <button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Product</button>
+                                <button class="btn btn-primary float-end" data-bs-toggle="modal" data-bs-target="#exampleModal" id="btnAdd">Add Product</button>
                                 <table class="product-table mt-5">
                                     <thead>
                                         <tr>
@@ -621,12 +622,18 @@
                                         <?php 
                                             include 'connection.php';
                                             global $con;
+                                        
+                                            $email=$_SESSION['is_login'];
+                                            $select_user_id="SELECT `userID` FROM `tbusers` WHERE `email`='$email'";
+                                            $res=$con->query($select_user_id);
+                                            $userID=$res->fetch_assoc()['userID'];
                                             $selectProduct="SELECT *, `profile` FROM `tbproducts` INNER JOIN `tbusers` ON `user_id`=`userID`";
                                             $res=$con->query($selectProduct);
                                             while($row=$res->fetch_assoc()){
                                                 echo '
                                                      <tr>
                                             <td>
+                                        
                                                 <img width="60" src="./uploads/'. $row['image']. '" />
                                             </td>
                                             <td class="product-id">'.$row['product_id'].'</td>
@@ -640,8 +647,8 @@
                                             <td class="timestamp">'.$row['create_at'].'</td>
                                             <td class="timestamp">'.$row['update_at'].'</td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3">Edit</a>
-                                            <a href="#" class="text-red-600 hover:text-red-900">Delete</a>
+                                            <a href="#" class="text-indigo-600 hover:text-indigo-900 mr-3" data-id="'.$row['product_id'].'" user-id="'.$userID.'" data-bs-toggle="modal" id="btnEdit" data-bs-target="#exampleModal">Edit</a>
+                                            <a href="#" data-id="'.$row['product_id'].'" id="btnDelete" class="text-red-600 hover:text-red-900" data-bs-toggle="modal" data-bs-target="#exampleModalDelete">Delete</a>
                                         </td>
                                         </tr>
                                                 ';
@@ -655,35 +662,62 @@
                         </div>
                     </div>
                 </div>
+                <!-- Modal delete -->
+               
+            <div class="modal fade" id="exampleModalDelete" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Are you sure do delete this product?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="function.php" method="post">
+                        <div class="form-group d-flex justify-content-end gap-2">
+                            <input type="hidden" name="delete_id" id="delete_id">
+                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-danger" name="delete">Yes, delete it. </button>
+                        </div>
+                    </form>
+                </div>
+                
+                </div>
+            </div>
+            </div>
                 <!-- Modal -->
                 <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Add Product</h5>
+                        <h5 class="modal-title"  id="title"></h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
                        <form action="function.php" method="post" enctype="multipart/form-data">
+                        <input type="text" name="hide_id" id="hide_id" class="form-control">
+                                <input type="text" name="user_id" id="user_id" class="form-control">
                             <div class="form-group">
                                 <label for="" class="form-label">Product Name</label>
-                                <input type="text" name="name" id="" class="form-control">
+                                <input type="text" name="name" id="name" class="form-control">
+                                
                             </div>
                             <div class="form-group">
                                 <label for="" class="form-label">Product Qty</label>
-                                <input type="text" name="qty" id="" class="form-control">
+                                <input type="text" name="qty" id="qty" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label for="" class="form-label">Product Price</label>
-                                <input type="text" name="price" id="" class="form-control">
+                                <input type="text" name="price" id="price" class="form-control">
                             </div>
                             <div class="form-group">
                                 <label for="" class="form-label">Product Image</label>
-                                <input type="file" name="image" id="" class="form-control">
+                                <input type="file" name="image" id="image" class="form-control">
+                                <input type="text" name="old_image" id="old_image" class="form-control">
                             </div>
                             <div class="form-group d-flex justify-content-end gap-2 mt-3">
                                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary" name="btnSave">Save </button>
+                                <button type="submit" class="btn btn-primary" name="btnSave" id="save">Save </button>
+                                <button type="submit" class="btn btn-success" name="btnEdit" id="edit">Edit </button>
                             </div>
                             
                        </form>
@@ -824,6 +858,39 @@
                 pageTitle.textContent = titles[pageId];
             }
         }
+        $(document).ready(function(){
+            $(document).on('click','#btnDelete',function(){
+                const id=$(this).attr('data-id');
+                $('#delete_id').val(id);
+            })
+            $('#btnAdd').click(function(){
+                $('#save').show();
+                $('#edit').hide();
+                $('#title').html('Add Product');
+            })
+            $(document).on('click','#btnEdit',function(){
+                $('#save').hide();
+                $('#edit').show();
+                $('#title').html('Edit Product');
+                // get data from table
+                let tr=$(this).parents('tr');
+                const image=tr.find('img').eq(0).attr('src').split('/').pop();
+                const id=$(this).attr('data-id');
+                const userid=$(this).attr('user-id');
+                const name=tr.find('td').eq(2).text().trim();
+                const qty=tr.find('td').eq(3).text();
+                const price=tr.find('td').eq(4).text();
+                // insert data into form
+                $('#hide_id').val(id);
+                $('#name').val(name);
+                $('#qty').val(qty);
+                $('#price').val(price);
+                $('#user_id').val(userid);
+                $('#old_image').val(image);
+                
+                 
+            })
+        })
     </script>
 </body>
 </html>
