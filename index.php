@@ -41,7 +41,7 @@
                                         <td>'.$row['session'].'</td>
                                         <td><img width="80" src="./uploads/'.$row['image'].'" alt=""></td>
                                         <td>
-                                            <button class="btn btn-warning me-2 mb-1">Edit</button>
+                                            <button class="btn btn-warning me-2 mb-1" data-id="'.$row['id'].' " id="edit">Edit</button>
                                             <button class="btn btn-danger" id="btnDelete" data-id="'.$row['id'].'" data-bs-toggle="modal" data-bs-target="#exampleModal">Delete</button>
                                         </td>
                                     </tr>
@@ -54,10 +54,11 @@
             </div>
             <div class="col-4 px-4 mt-5">
                 <form action="" method="post" class="px-5 py-3 border border-2 mx-3" enctype="multipart/form-data">
-                    <h3 class="text-center">Insert Course</h3>
+                    <h3 class="text-center" id="title">Insert Course</h3>
                     <div class="form-group">
                         <label for="name" class="form-label">Name</label>
                         <input type="text" name="name" id="name" class="form-control">
+                        <input type="hidden" name="id" id="id" class="form-control">
                     </div>
                     <div class="form-group">
                         <label for="price" class="form-label">Price</label>
@@ -91,8 +92,9 @@
                         <img id="img" style="cursor: pointer;" width="80" src="https://png.pngtree.com/png-vector/20230407/ourmid/pngtree-placeholder-line-icon-vector-png-image_6691835.png" alt="">
                     </div>
                     <div class="form-group mt-2 d-flex justify-content-end">
-                        <button class="btn btn-danger me-1" type="reset">Reset</button>
+                        <button class="btn btn-danger me-1" type="button" id="btnReset">Reset</button>
                         <button class="btn btn-primary me-1" type="button" id="btnAdd">Add</button>
+                        <button class="btn btn-warning me-1" type="button" id="btnEdit">Edit</button>
                     </div>
                 </form>
             </div>
@@ -148,7 +150,10 @@
             const time=$('#time').val();
             const session=$('#session').val();
             const hide_image=$('#hide_image').val();
-            $.ajax({
+            if(name=='' || price=='' || time==''||session==''||hide_image==''){
+                alert('Please enter all value.');
+            }else{
+                 $.ajax({
                 url:'insert.php',
                 method:'post',
                 data:{
@@ -169,7 +174,7 @@
                         <td>${session}</td>
                         <td><img width="80" src="./uploads/${hide_image}" alt=""></td>
                         <td>
-                            <button class="btn btn-warning me-2 mb-1">Edit</button>
+                            <button class="btn btn-warning me-2 mb-1" data-id="${res}" id="edit">Edit</button>
                             <button class="btn btn-danger" data-id="${res}" data-bs-toggle="modal" data-bs-target="#exampleModal" id="btnDelete">Delete</button>
                         </td>
                     </tr>
@@ -178,6 +183,9 @@
 
             })
             clearForm();
+            $('#img').attr('src','https://png.pngtree.com/png-vector/20230407/ourmid/pngtree-placeholder-line-icon-vector-png-image_6691835.png');
+            }
+           
         });
 
         // delete
@@ -199,11 +207,72 @@
                 success:function(res){
                     if(res=='Success'){
                         row.remove();
+                        $('#img').attr('src','https://png.pngtree.com/png-vector/20230407/ourmid/pngtree-placeholder-line-icon-vector-png-image_6691835.png');
                     }
                     
                 }
             });
             
+        })
+        $('#btnEdit').hide();
+        $(document).on('click','#edit',function(){
+           $('#btnEdit').show();
+           $('#btnAdd').hide(); 
+           $('#title').html('Edit Course');
+           row=$(this).parents('tr');
+            //    get data from table
+
+            let id=row.find('td').eq(0).text();
+            let name=row.find('td').eq(1).text();
+            let price=row.find('td').eq(2).text().split('$')[0];
+            let time=row.find('td').eq(3).text();
+            let session=row.find('td').eq(4).text();
+            let image=row.find('img').attr('src').split('/').pop();
+            // take data insert to form
+            $('#id').val(id)
+            $("#name").val(name);
+            $("#price").val(price);
+            $("#time").val(time);
+            $("#session").val(session);
+            $('#hide_image').val(image);
+            $('#img').attr('src','./uploads/'+image);
+            $('#btnEdit').click(function(){
+                const id=$('#id').val();
+                const name=$('#name').val();
+                const price=$('#price').val();
+                const time=$('#time').val();
+                const session=$('#session').val();
+                const hide_image=$('#hide_image').val();
+                $.ajax({
+                    url:'update.php',
+                    method:'post',
+                    data:{
+                        id:id,
+                        name:name,
+                        price:price,
+                        time:time,
+                        session:session,
+                        image:hide_image,
+                    },
+                    cache:false,
+                    success:function(res){
+                        if(res){
+                            row.find('td').eq(1).html(name);
+                            row.find('td').eq(2).html(price+'$');
+                            row.find('td').eq(3).html(time);
+                            row.find('td').eq(4).html(session);
+                            row.find('img').attr('src','./uploads/'+res);
+                            clearForm();
+                            $('#btnEdit').hide();
+                            $('#btnAdd').show(); 
+                            $('#title').html('Add Course');
+                            $('#img').attr('src','https://png.pngtree.com/png-vector/20230407/ourmid/pngtree-placeholder-line-icon-vector-png-image_6691835.png');
+                        }
+                    }
+
+                });
+            });
+
         })
         function clearForm(){
             $('#name').val('');
@@ -212,5 +281,11 @@
             $('#session').val('');       
             $('#hide_image').val('');
         }
+        $('#btnReset').click(function(){
+            clearForm();
+            $('#btnEdit').hide();
+           $('#btnAdd').show(); 
+           $('#title').html('Add Course')
+        })
     })
 </script>
